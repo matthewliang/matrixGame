@@ -21,6 +21,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 
 /**
@@ -177,7 +178,6 @@ public class GameCourt extends JPanel {
 							playing = false;
 						}
 						neo.invulnerable = true;
-						System.out.println("Hit by " + p);
 						if (playing) {
 							projIter.remove();
 						}
@@ -211,9 +211,13 @@ public class GameCourt extends JPanel {
 			
 			if (!playing) {
 				try {
-					String playerName = getPlayerName("");
-					if (playerName != null) {
-						addHighScore(playerName, score);
+					ArrayList<Integer> hsList = getHighScores();
+					System.out.println(hsList);
+					if (hsList == null || score >= Collections.min(hsList) || hsList.size() < 10) {
+						String playerName = getPlayerName("");
+						if (playerName != null) {
+							addHighScore(playerName, score);
+						}
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -282,6 +286,26 @@ public class GameCourt extends JPanel {
 		else {
 			Circle c = new Circle(COURT_WIDTH, COURT_HEIGHT, initGridX, initGridY);
 			projectiles.add(c);
+		}
+	}
+	
+	public ArrayList<Integer> getHighScores() throws IOException {
+		ArrayList<Integer> highScores = new ArrayList<Integer>();
+		try {
+			Reader r = new FileReader(highscores_file);
+			BufferedReader br = new BufferedReader(r);
+			String line = br.readLine();
+			
+			while (line != null && highScores.size() < 10) {
+				int highScore = Integer.parseInt(line.substring(line.indexOf(" ") + 1));
+				highScores.add(highScore);
+				line = br.readLine();
+			}
+			br.close();
+			r.close();
+			return highScores;
+		} catch (FileNotFoundException e) {
+			return null;
 		}
 	}
 	

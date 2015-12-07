@@ -84,7 +84,6 @@ public class Neo extends GameObj {
 	}
 	
 	public boolean isValid(int x, int y) {
-		System.out.println(x + " " + y);
 		return !(x < min_x || y < min_y || x > max_x || y > max_y);
 	}
 	
