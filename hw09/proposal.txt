@@ -1,0 +1,82 @@
+=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
+CIS 120 Game Project Proposal
+PennKey: matliang
+=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
+
+===============
+=: Your Game :=
+===============
+
+- What game are you planning to implement? If it is a game of your own design,
+  or not especially well-known, provide a 2-3 sentence description of the game.
+We are going to implement a game where the player must dodge various projectiles, moving about in a 2-D grid. The player will be able to collect lives, losing them when colliding with a projectile, and the game finishes when the player runs out of lives. The score will be equal to the number of projectiles released and high scores will be tracked.
+
+
+- What classes and interfaces do you plan to create? How will the different
+  components of your game (the model, the GUI, etc.) interact?
+I will create a GameObject class with subclasses for each object, such as the player, balls, spikes, bombs, and hearts. The player moves the player object, while the others are randomly released from the edges of the court. Colliding with each object will change the health of the player accordingly. Additionally, I plan to create a GameCourt class, which is the main playable area of the game. In it, I will draw the player object as well as other game objects, and it will handle movement and release of projectiles. Finally, the Game class which will contain the frame and widgets of the GUI, including the GameCourt.
+
+
+- What do you think will be the most challenging thing to implement?
+I think handling the motion of each object will be challenging as projectiles must move smoothly while the player must move from square to square. Thus, these two types of motion must work together in the end.
+
+
+====================
+=: Core Concept 1 :=
+====================
+
+Concept 1: 2D Array
+
+- What specific feature of your game will be implemented using this concept?
+The motion of the player object will be from square to square in a 2D grid, which would be represented as an Array. This will allow me to accurately store the object’s position. In addition, each projectile will be released along a row or column of a grid, so I know their position as well.
+
+
+- Why does it make sense to implement this feature with this concept? Justify
+  why this is a non-trivial application of the concept in question.
+This makes sense because the board is a fixed size and the values of the player object’s position will all be integral, easy to store in a 2D array.
+
+
+====================
+=: Core Concept 2 :=
+====================
+
+Concept 2: I/O
+
+- What specific feature of your game will be implemented using this concept?
+I will store a list of the user’s high scores in a text file. After each play, the high scores will be written to a text file or updated, and when the user wants to see their scores, they will be read back in to the program.
+
+
+- Why does it make sense to implement this feature with this concept? Justify
+  why this is a non-trivial application of the concept in question.
+Using I/O to parse the text file of high scores will allow me to save the scores between different instances of the game. Otherwise, when the game is closed, there would be no way to save the scores that the user had earned.
+
+====================
+=: Core Concept 3 :=
+====================
+
+Concept 3: Object-oriented design
+
+- What specific feature of your game will be implemented using this concept?
+I plan to create a GameObject superclass with specific subclasses, such as the player and the projectiles, i.e. balls, spikes, bombs, and hearts. They all share common features like position, which cannot pass the boundaries of the game, and the projectiles will all have similar motion across the screen. 
+
+
+- Why does it make sense to implement this feature with this concept? Justify
+  why this is a non-trivial application of the concept in question.
+This makes sense as each of these objects are distinct so each one needs a different function when it interacts with the player object. However, they share properties like movement and position, so having a superclass to contain these methods would be useful.
+
+
+====================
+=: Core Concept 4 :=
+====================
+
+Concept 4: Collision detection
+
+- What specific feature of your game will be implemented using this concept?
+As the game revolves around the player object colliding with various projectiles of different shapes, and since none of these shapes will simply be squares, more complex collision detection will be needed to ensure detection whenever a projectile intersects with the player object.
+
+
+- Why does it make sense to implement this feature with this concept? Justify
+  why this is a non-trivial application of the concept in question.
+This is nontrivial because there will be different shapes involved, i.e. circles, triangle-like objects, hearts, and bombs. Each has different boundaries, and since the player object does not fill the entire square it is on, it is necessary to ensure collision detection works differently for each object in order for the game to run smoothly.
+
+
