@@ -44,5 +44,8 @@ public class Bomb extends Projectile {
 	public void interact(Neo neo) {
 		neo.changeLives(neo.lives = 0);
 	}
-
+	
+	public BufferedImage getImage() {
+		return img;
+	}
 }

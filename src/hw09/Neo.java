@@ -91,6 +91,18 @@ public class Neo extends GameObj {
 		lives = numLives;
 	}
 	
+	public static BufferedImage getImage() {
+		return img;
+	}
+	
+	public int getXPos() {
+		return this.pos_x;
+	}
+	
+	public int getYPos() {
+		return this.pos_y;
+	}
+	
 	@Override
 	public void draw(Graphics g) {
 		if (!invulnerable) {

@@ -7,6 +7,7 @@ package hw09;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 import javax.imageio.ImageIO;
@@ -39,7 +40,10 @@ public class GameCourt extends JPanel {
 	private Neo neo; // character that the player moves
 
 	public boolean playing = false; // whether the game is running
-	private JLabel status; // Current status text (i.e. Running...)
+	public boolean gameOver = false;
+	public boolean highScoreScreen = false;
+	public boolean instructionScreen = false;
+	private JLabel status; // Current status text
 
 	// Game constants
 	public static final int COURT_WIDTH = 400;
@@ -132,6 +136,9 @@ public class GameCourt extends JPanel {
 		bonuses = new ArrayList<GameObj>();
 
 		playing = true;
+		gameOver = false;
+		highScoreScreen = false;
+		instructionScreen = false;
 		score = 0;
 		spikeProb = INIT_SPIKE_PROB;
 		bombProb = INIT_BOMB_PROB;
@@ -170,9 +177,8 @@ public class GameCourt extends JPanel {
 			while (projIter.hasNext()) {
 				Projectile p = projIter.next();
 				p.move();
-				
 				if (!neo.invulnerable) {
-					if (p.intersects(neo)) {
+					if (p.hasCollision(neo)) {
 						p.interact(neo);
 						if (neo.lives <= 0) {
 							playing = false;
@@ -210,14 +216,15 @@ public class GameCourt extends JPanel {
 			repaint();
 			
 			if (!playing) {
+				gameOver = true;
 				try {
 					ArrayList<Integer> hsList = getHighScores();
-					System.out.println(hsList);
 					if (hsList == null || score >= Collections.min(hsList) || hsList.size() < 10) {
 						String playerName = getPlayerName("");
 						if (playerName != null) {
 							addHighScore(playerName, score);
 						}
+						showHighScores();
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -322,9 +329,10 @@ public class GameCourt extends JPanel {
 	    	return null;
 	    }
 	    
-	    if(playerName.isEmpty() || !playerName.matches("[A-Za-z]*"))
+	    if(playerName.isEmpty() || !playerName.matches("[A-Za-z]*") || playerName.length() > 10)
 	    {
-	        playerName = getPlayerName("Please enter a name that only contains letters.\n");
+	        playerName = getPlayerName
+	        		("Please enter a name under 10 letters long.\n");
 	    }
 
 	    return playerName;
@@ -370,6 +378,24 @@ public class GameCourt extends JPanel {
 		}
 	}
 	
+	public void showInstructions() {
+		instructionScreen = true;
+		playing = false;
+		highScoreScreen = false;
+		gameOver = false;
+		status.setText("Learning to play");
+		repaint();
+	}
+	
+	public void showHighScores() {
+		playing = false;
+		instructionScreen = false;
+		highScoreScreen = true;
+		gameOver = false;
+		status.setText("Admiring the hall of fame");
+		repaint();
+	}
+	
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
@@ -391,8 +417,109 @@ public class GameCourt extends JPanel {
 			int heartXPos = 200 - neo.lives * 5;
 			g.drawImage(subImg, heartXPos, 385, heartWidth, 10, null);
 		}
+		if (gameOver) {
+			drawGameOver(g);
+		}
+		else if (highScoreScreen) {
+			drawHighScoreScreen(g, score);
+		}
+		else if (instructionScreen) {
+			drawInstructionScreen(g);
+		}
+	}
+	
+	public void drawGameOver(Graphics g) {
+		Graphics2D g2 = (Graphics2D) g;
+        g2.setColor(Color.BLACK);
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+	            RenderingHints.VALUE_ANTIALIAS_ON);
+        Font font = new Font("Arial", Font.PLAIN, 50);
+        g2.setFont(font);
+        FontMetrics fm = g2.getFontMetrics();
+        Rectangle2D rect = fm.getStringBounds("Game Over!", g2);
+        int x = (this.getWidth() - (int) rect.getWidth()) / 2;
+		g.clearRect(51, 51, 299, 50);
+        g.drawString("Game Over!", x, 100);
 	}
 
+	public void drawHighScoreScreen(Graphics g, int score) {
+		g.clearRect(0, 0, COURT_WIDTH, COURT_HEIGHT);
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setColor(Color.BLACK);
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+	            RenderingHints.VALUE_ANTIALIAS_ON);
+        Font font = new Font("Arial", Font.PLAIN, 50);
+        g2.setFont(font);
+        FontMetrics fm = g2.getFontMetrics();
+        Rectangle2D rect = fm.getStringBounds("High Scores", g2);
+        int x = (this.getWidth() - (int) rect.getWidth()) / 2;
+        g.drawString("High Scores", x, 100);
+        
+        ArrayList<String> highScoreNames = new ArrayList<String>();
+        ArrayList<String> highScores = new ArrayList<String>();
+		try {
+			Reader r = new FileReader(highscores_file);
+			BufferedReader br = new BufferedReader(r);
+			String line = br.readLine();
+			
+			while (line != null && highScores.size() < 10) {
+				int spaceIndex = line.indexOf(" ");
+				highScoreNames.add(line.substring(0, spaceIndex));
+				highScores.add(line.substring(spaceIndex + 1));
+				line = br.readLine();
+			}
+			br.close();
+			r.close();
+		} catch (IOException e) {
+			// do nothing
+		}
+		
+		font = new Font("Arial", Font.PLAIN, 20);
+		g2.setFont(font);
+		int newScoreIndex = highScores.indexOf(Integer.toString(score));
+		for (int i = 0; i < highScores.size(); i++) {
+			int yPos = 150 + 25 * i;
+			g2.setColor(Color.BLACK);
+			if (i == newScoreIndex) {
+				g2.setColor(Color.RED);
+			}
+			g.drawString((i + 1) + ". ", 65, yPos);
+			g.drawString(highScoreNames.get(i), 95, yPos);
+			g.drawString(highScores.get(i), 265, yPos);
+		}
+	}
+	
+	public void drawInstructionScreen(Graphics g) {
+		g.clearRect(0, 0, COURT_WIDTH, COURT_HEIGHT);
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setColor(Color.BLACK);
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+	            RenderingHints.VALUE_ANTIALIAS_ON);
+        Font font = new Font("Arial", Font.PLAIN, 50);
+        g2.setFont(font);
+        FontMetrics fm = g2.getFontMetrics();
+        Rectangle2D rect = fm.getStringBounds("Instructions", g2);
+        int x = (this.getWidth() - (int) rect.getWidth()) / 2;
+        g.drawString("Instructions", x, 100);
+        
+        font = new Font("Arial", Font.PLAIN, 15);
+		g2.setFont(font);
+        ArrayList<String> instructs = new ArrayList<String>();
+        instructs.add("You are Neo in the Matrix.");
+        instructs.add("To survive, use the arrow keys to dodge projectiles.");
+        instructs.add("You start with 3 lives.");
+        instructs.add("Balls take 1, spikes take 2, and bombs kill you instantly!");
+        instructs.add("Collect hearts to gain lives.");
+        instructs.add("If you have 5 lives, then you get +5 score instead.");
+        instructs.add("Be careful, the game gets harder the longer you play.");
+        instructs.add("");
+        instructs.add("Good luck; have fun!");
+        for (int i = 0; i < instructs.size(); i++) {
+			int yPos = 150 + 18 * i;
+			g.drawString(instructs.get(i), 30, yPos);
+		}
+	}
+	
 	@Override
 	public Dimension getPreferredSize() {
 		return new Dimension(COURT_WIDTH, COURT_HEIGHT);

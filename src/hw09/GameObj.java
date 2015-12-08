@@ -87,6 +87,5 @@ public class GameObj {
 	}
 	
 	public void interact(Neo neo) {
-		
 	}
 }

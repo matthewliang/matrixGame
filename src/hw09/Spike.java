@@ -6,6 +6,11 @@ package hw09;
  */
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
 
 /**
  * A basic game object displayed as a yellow circle, starting in the upper left
@@ -13,13 +18,21 @@ import java.awt.*;
  * 
  */
 public class Spike extends Projectile {
-
+	public static final String img_file = "spike.png";
 	public static final int SPEED = 10;
 	public int side;
+	private static BufferedImage img;
 
 	public Spike(int courtWidth, int courtHeight, int initGridX, int initGridY) {
 		super(initGridX, initGridY, 20, 40,
 				courtWidth, courtHeight, SPEED);
+		try {
+			if (img == null) {
+				img = ImageIO.read(new File(img_file));
+			}
+		} catch (IOException e) {
+			System.out.println("Internal Error:" + e.getMessage());
+		}
 	}
 	
 	public void setSide(int s) {
@@ -33,24 +46,27 @@ public class Spike extends Projectile {
 
 	@Override
 	public void draw(Graphics g) {
-		g.setColor(Color.BLUE);
 		// 0 = up, 1 = down, 2 = left, 3 = right
 		if (side == 0) {
-			g.fillPolygon(new int[] {pos_x, pos_x + 10, pos_x + 20},
-					new int[] {pos_y, pos_y + 40, pos_y}, 3);
+			BufferedImage subImg = img.getSubimage(40, 20, 20, 40);
+			g.drawImage(subImg, pos_x, pos_y, width, height, null);
 		}
 		else if (side == 1) {
-			g.fillPolygon(new int[] {pos_x, pos_x + 10, pos_x + 20},
-					new int[] {pos_y + 40, pos_y, pos_y + 40}, 3);
+			BufferedImage subImg = img.getSubimage(0, 0, 20, 40);
+			g.drawImage(subImg, pos_x, pos_y, width, height, null);
 		}
 		else if (side == 2) {
-			g.fillPolygon(new int[] {pos_x, pos_x + 40, pos_x},
-					new int[] {pos_y, pos_y + 10, pos_y + 20}, 3);
+			BufferedImage subImg = img.getSubimage(0, 40, 40, 20);
+			g.drawImage(subImg, pos_x, pos_y, width, height, null);
 		}
 		else if (side == 3) {
-			g.fillPolygon(new int[] {pos_x + 40, pos_x, pos_x + 40},
-					new int[] {pos_y, pos_y + 10, pos_y + 20}, 3);
+			BufferedImage subImg = img.getSubimage(20, 0, 40, 20);
+			g.drawImage(subImg, pos_x, pos_y, width, height, null);
 		}
+	}
+	
+	public BufferedImage getImage() {
+		return img;
 	}
 	
 	@Override

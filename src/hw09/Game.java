@@ -42,13 +42,30 @@ public class Game implements Runnable {
 		// an instance of ActionListener with its actionPerformed()
 		// method overridden. When the button is pressed,
 		// actionPerformed() will be called.
-		final JButton reset = new JButton("Play Again");
+		final JButton instructions = new JButton("Instructions");
+		instructions.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				court.showInstructions();
+			}
+		});
+		control_panel.add(instructions);
+		
+		final JButton reset = new JButton("Play");
 		reset.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				court.reset();
 			}
 		});
 		control_panel.add(reset);
+		
+		final JButton highScores = new JButton("High Scores");
+		highScores.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				court.showHighScores();
+			}
+		});
+		control_panel.add(highScores);
+		
 		
 		// Put the frame on the screen
 		frame.pack();
