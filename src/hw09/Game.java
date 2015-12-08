@@ -32,48 +32,13 @@ public class Game implements Runnable {
 		// Main playing area
 		final GameCourt court = new GameCourt(status);
 		frame.add(court, BorderLayout.CENTER);
-
-		// Reset button
-		final JPanel control_panel = new JPanel();
-		frame.add(control_panel, BorderLayout.NORTH);
-
-		// Note here that when we add an action listener to the reset
-		// button, we define it as an anonymous inner class that is
-		// an instance of ActionListener with its actionPerformed()
-		// method overridden. When the button is pressed,
-		// actionPerformed() will be called.
-		final JButton instructions = new JButton("Instructions");
-		instructions.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				court.showInstructions();
-			}
-		});
-		control_panel.add(instructions);
-		
-		final JButton reset = new JButton("Play");
-		reset.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				court.reset();
-			}
-		});
-		control_panel.add(reset);
-		
-		final JButton highScores = new JButton("High Scores");
-		highScores.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				court.showHighScores();
-			}
-		});
-		control_panel.add(highScores);
-		
 		
 		// Put the frame on the screen
 		frame.pack();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
-
-		// Start game
-		court.reset();
+		
+		court.showMenu();
 	}
 
 	/*

@@ -1,0 +1,5 @@
+package hw09;
+
+public enum State {
+	MENU, PLAYING, GAMEOVER, HIGHSCORESCREEN, INSTRUCTIONSCREEN;
+}

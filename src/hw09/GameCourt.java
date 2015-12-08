@@ -39,10 +39,7 @@ public class GameCourt extends JPanel {
 	// the state of the game logic
 	private Neo neo; // character that the player moves
 
-	public boolean playing = false; // whether the game is running
-	public boolean gameOver = false;
-	public boolean highScoreScreen = false;
-	public boolean instructionScreen = false;
+	public State state;
 	private JLabel status; // Current status text
 
 	// Game constants
@@ -62,6 +59,9 @@ public class GameCourt extends JPanel {
 	public static int spikeProb = INIT_SPIKE_PROB;
 	public static int bombProb = INIT_BOMB_PROB;
 	
+	public static final String menuImg_file = "matrixMenu.png";
+	private static BufferedImage menuImg;
+	
 	public static final String img_file = "heartSmall.png";
 	private static BufferedImage img;
 	
@@ -76,6 +76,9 @@ public class GameCourt extends JPanel {
 		try {
 			if (img == null) {
 				img = ImageIO.read(new File(img_file));
+			}
+			if (menuImg == null) {
+				menuImg = ImageIO.read(new File(menuImg_file));
 			}
 		} catch (IOException e) {
 			System.out.println("Internal Error:" + e.getMessage());
@@ -123,6 +126,37 @@ public class GameCourt extends JPanel {
 			}
 		});
 
+		addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				if (state == State.MENU) {
+					if (e.getX() > 165 && e.getX() < 235 &&
+							e.getY() > 205 && e.getY() < 230) {
+						reset();
+					}
+					else if (e.getX() > 90 && e.getX() < 305 &&
+							e.getY() > 240 && e.getY() < 265) {
+						showInstructions();
+					}
+					else if (e.getX() > 100 && e.getX() < 300 &&
+							e.getY() > 280 && e.getY() < 305) {
+						showHighScores();
+					}
+				}
+				else if (state == State.INSTRUCTIONSCREEN || state == State.HIGHSCORESCREEN) {
+					if (e.getX() > 170 && e.getX() < 240 &&
+							e.getY() > 10 && e.getY() < 35) {
+						showMenu();
+					}
+				}
+				else if (state == State.GAMEOVER) {
+					if (e.getX() > 65 && e.getX() < 335 &&
+							e.getY() > 310 && e.getY() < 345) {
+						reset();
+					}
+				}
+			}
+		});
+		
 		this.status = status;
 	}
 
@@ -135,10 +169,7 @@ public class GameCourt extends JPanel {
 		projectiles = new ArrayList<Projectile>();
 		bonuses = new ArrayList<GameObj>();
 
-		playing = true;
-		gameOver = false;
-		highScoreScreen = false;
-		instructionScreen = false;
+		state = State.PLAYING;
 		score = 0;
 		spikeProb = INIT_SPIKE_PROB;
 		bombProb = INIT_BOMB_PROB;
@@ -153,7 +184,7 @@ public class GameCourt extends JPanel {
 	 * triggers.
 	 */
 	void tick() {
-		if (playing) {
+		if (state == State.PLAYING) {
 			
 			int heartSpawn = rand.nextInt(100);
 			if (heartSpawn < 1) {
@@ -181,10 +212,10 @@ public class GameCourt extends JPanel {
 					if (p.hasCollision(neo)) {
 						p.interact(neo);
 						if (neo.lives <= 0) {
-							playing = false;
+							state = State.GAMEOVER;
 						}
 						neo.invulnerable = true;
-						if (playing) {
+						if (state == State.PLAYING) {
 							projIter.remove();
 						}
 					}
@@ -215,16 +246,15 @@ public class GameCourt extends JPanel {
 			// update the display
 			repaint();
 			
-			if (!playing) {
-				gameOver = true;
+			if (state == State.GAMEOVER) {
 				try {
 					ArrayList<Integer> hsList = getHighScores();
 					if (hsList == null || score >= Collections.min(hsList) || hsList.size() < 10) {
 						String playerName = getPlayerName("");
 						if (playerName != null) {
 							addHighScore(playerName, score);
+							showHighScores();
 						}
-						showHighScores();
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -378,20 +408,20 @@ public class GameCourt extends JPanel {
 		}
 	}
 	
+	public void showMenu() {
+		state = State.MENU;
+		status.setText(" ");
+		repaint();
+	}
+	
 	public void showInstructions() {
-		instructionScreen = true;
-		playing = false;
-		highScoreScreen = false;
-		gameOver = false;
+		state = State.INSTRUCTIONSCREEN;
 		status.setText("Learning to play");
 		repaint();
 	}
 	
 	public void showHighScores() {
-		playing = false;
-		instructionScreen = false;
-		highScoreScreen = true;
-		gameOver = false;
+		state = State.HIGHSCORESCREEN;
 		status.setText("Admiring the hall of fame");
 		repaint();
 	}
@@ -399,6 +429,10 @@ public class GameCourt extends JPanel {
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
+		if (state == State.MENU) {
+			g.drawImage(menuImg, 0, 0, 400, 400, null);
+		}
+		if (state == State.PLAYING || state == State.GAMEOVER) {
 		g.setColor(Color.WHITE);
 		g.fillRect(0, 0, 400, 400);
 		g.setColor(Color.BLACK);
@@ -417,13 +451,14 @@ public class GameCourt extends JPanel {
 			int heartXPos = 200 - neo.lives * 5;
 			g.drawImage(subImg, heartXPos, 385, heartWidth, 10, null);
 		}
-		if (gameOver) {
+		}
+		if (state == State.GAMEOVER) {
 			drawGameOver(g);
 		}
-		else if (highScoreScreen) {
+		else if (state == State.HIGHSCORESCREEN) {
 			drawHighScoreScreen(g, score);
 		}
-		else if (instructionScreen) {
+		else if (state == State.INSTRUCTIONSCREEN) {
 			drawInstructionScreen(g);
 		}
 	}
@@ -433,13 +468,21 @@ public class GameCourt extends JPanel {
         g2.setColor(Color.BLACK);
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 	            RenderingHints.VALUE_ANTIALIAS_ON);
-        Font font = new Font("Arial", Font.PLAIN, 50);
+        Font font = new Font("Trajan Pro", Font.PLAIN, 45);
         g2.setFont(font);
         FontMetrics fm = g2.getFontMetrics();
         Rectangle2D rect = fm.getStringBounds("Game Over!", g2);
         int x = (this.getWidth() - (int) rect.getWidth()) / 2;
 		g.clearRect(51, 51, 299, 50);
         g.drawString("Game Over!", x, 100);
+        
+        font = new Font("Trajan Pro", Font.PLAIN, 45);
+        g2.setFont(font);
+        fm = g2.getFontMetrics();
+        rect = fm.getStringBounds("Play Again", g2);
+        x = (this.getWidth() - (int) rect.getWidth()) / 2;
+        g.clearRect(51, 300, 299, 50);
+        g.drawString("Play Again", x, 345);
 	}
 
 	public void drawHighScoreScreen(Graphics g, int score) {
@@ -448,12 +491,19 @@ public class GameCourt extends JPanel {
         g2.setColor(Color.BLACK);
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 	            RenderingHints.VALUE_ANTIALIAS_ON);
-        Font font = new Font("Arial", Font.PLAIN, 50);
+        Font font = new Font("Trajan Pro", Font.PLAIN, 48);
         g2.setFont(font);
         FontMetrics fm = g2.getFontMetrics();
         Rectangle2D rect = fm.getStringBounds("High Scores", g2);
         int x = (this.getWidth() - (int) rect.getWidth()) / 2;
         g.drawString("High Scores", x, 100);
+        
+        font = new Font("Trajan Pro", Font.PLAIN, 20);
+        g2.setFont(font);
+        fm = g2.getFontMetrics();
+        rect = fm.getStringBounds("Back", g2);
+        x = (this.getWidth() - (int) rect.getWidth()) / 2;
+        g.drawString("Home", x, 30);
         
         ArrayList<String> highScoreNames = new ArrayList<String>();
         ArrayList<String> highScores = new ArrayList<String>();
@@ -478,7 +528,7 @@ public class GameCourt extends JPanel {
 		g2.setFont(font);
 		int newScoreIndex = highScores.indexOf(Integer.toString(score));
 		for (int i = 0; i < highScores.size(); i++) {
-			int yPos = 150 + 25 * i;
+			int yPos = 140 + 25 * i;
 			g2.setColor(Color.BLACK);
 			if (i == newScoreIndex) {
 				g2.setColor(Color.RED);
@@ -495,14 +545,21 @@ public class GameCourt extends JPanel {
         g2.setColor(Color.BLACK);
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 	            RenderingHints.VALUE_ANTIALIAS_ON);
-        Font font = new Font("Arial", Font.PLAIN, 50);
+        Font font = new Font("Trajan Pro", Font.PLAIN, 48);
         g2.setFont(font);
         FontMetrics fm = g2.getFontMetrics();
         Rectangle2D rect = fm.getStringBounds("Instructions", g2);
         int x = (this.getWidth() - (int) rect.getWidth()) / 2;
         g.drawString("Instructions", x, 100);
         
-        font = new Font("Arial", Font.PLAIN, 15);
+        font = new Font("Trajan Pro", Font.PLAIN, 20);
+        g2.setFont(font);
+        fm = g2.getFontMetrics();
+        rect = fm.getStringBounds("Back", g2);
+        x = (this.getWidth() - (int) rect.getWidth()) / 2;
+        g.drawString("Home", x, 30);
+        
+        font = new Font("Arial", Font.PLAIN, 14);
 		g2.setFont(font);
         ArrayList<String> instructs = new ArrayList<String>();
         instructs.add("You are Neo in the Matrix.");
@@ -515,7 +572,7 @@ public class GameCourt extends JPanel {
         instructs.add("");
         instructs.add("Good luck; have fun!");
         for (int i = 0; i < instructs.size(); i++) {
-			int yPos = 150 + 18 * i;
+			int yPos = 140 + 18 * i;
 			g.drawString(instructs.get(i), 30, yPos);
 		}
 	}
