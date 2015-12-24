@@ -1,26 +1,18 @@
-package hw09;
-/**
- * CIS 120 Game HW
- * (c) University of Pennsylvania
- * @version 2.0, Mar 2013
- */
+
 
 import java.awt.Graphics;
 
 /** An object in the game. 
  *
  *  Game objects exist in the game court. They have a position, 
- *  velocity, size and bounds. Their velocity controls how they 
- *  move; their position should always be within their bounds.
+ *  size and bounds. Their velocity controls how they 
+ *  move.
  */
 public class GameObj {
 
 	/** Current position of the object (in terms of graphics coordinates)
 	 *  
 	 * Coordinates are given by the upper-left hand corner of the object.
-	 * This position should always be within bounds.
-	 *  0 <= pos_x <= max_x 
-	 *  0 <= pos_y <= max_y 
 	 */
 	public int pos_x; 
 	public int pos_y;

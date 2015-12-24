@@ -1,9 +1,4 @@
-package hw09;
-/**
- * CIS 120 Game HW
- * (c) University of Pennsylvania
- * @version 2.0, Mar 2013
- */
+
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -13,8 +8,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 /**
- * A basic game object displayed as a yellow circle, starting in the upper left
- * corner of the game court.
+ * A game object displayed as a bomb. Bombs kill Neo instantly.
  * 
  */
 public class Bomb extends Projectile {

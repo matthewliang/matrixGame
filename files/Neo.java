@@ -1,4 +1,4 @@
-package hw09;
+
 
 /**
  * CIS 120 Game HW
@@ -13,10 +13,6 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-/**
- * A basic game object displayed as a black square
- * 
- */
 public class Neo extends GameObj {
 	public static final String img_file = "neo.png";
 	public static final String img_hit_file = "neoRed.png";
@@ -29,11 +25,6 @@ public class Neo extends GameObj {
 	public int lives = 3;
 	public boolean invulnerable = false;
 
-	/**
-	 * Note that, because we don't need to do anything special when constructing
-	 * a Square, we simply use the superclass constructor called with the
-	 * correct parameters
-	 */
 	public Neo(int courtWidth, int courtHeight) {
 		super(INIT_GRID_X, INIT_GRID_Y, WIDTH, HEIGHT, courtWidth,
 				courtHeight);

@@ -1,9 +1,4 @@
-package hw09;
-/**
- * CIS 120 Game HW
- * (c) University of Pennsylvania
- * @version 2.0, Mar 2013
- */
+
 
 import java.awt.Graphics;
 import java.awt.Rectangle;
@@ -103,7 +98,10 @@ public abstract class Projectile {
         	Rectangle neoBounds = new Rectangle();
         	neoBounds.setSize(neo.width, neo.height);
         	neoBounds.setLocation(neo.pos_x, neo.pos_y);
-            Rectangle bounds = getCollisionBounds(thisBounds, neoBounds);
+        	Area thisArea = new Area(thisBounds);
+        	Area neoArea = new Area(neoBounds);
+        	thisArea.intersect(neoArea);
+            Rectangle bounds = thisArea.getBounds();
             if (!bounds.isEmpty()) {
                 for (int x = bounds.x; x < bounds.x + bounds.width; x++) {
                     for (int y = bounds.y; y < bounds.y + bounds.height; y++) {
@@ -115,13 +113,6 @@ public abstract class Projectile {
             }
         }
         return false;
-    }
-
-    public Rectangle getCollisionBounds(Rectangle r1, Rectangle r2) {
-        Area a1 = new Area(r1);
-        Area a2 = new Area(r2);
-        a1.intersect(a2);
-        return a1.getBounds();
     }
     
 	public boolean collision(int x, int y, Neo neo) {

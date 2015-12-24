@@ -1,4 +1,4 @@
-package hw09;
+
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;

@@ -1,13 +1,7 @@
-package hw09;
-/**
- * CIS 120 Game HW
- * (c) University of Pennsylvania
- * @version 2.0, Mar 2013
- */
+
 
 // imports necessary libraries for Java swing
 import java.awt.*;
-import java.awt.event.*;
 import javax.swing.*;
 
 /**
@@ -15,22 +9,14 @@ import javax.swing.*;
  */
 public class Game implements Runnable {
 	public void run() {
-		// NOTE : recall that the 'final' keyword notes inmutability
-		// even for local variables.
 
 		// Top-level frame in which game components live
 		final JFrame frame = new JFrame("The Matrix");
 		frame.setBackground(Color.WHITE);
-		frame.setLocation(300, 300);
-
-		// Status panel
-		final JPanel status_panel = new JPanel();
-		frame.add(status_panel, BorderLayout.SOUTH);
-		final JLabel status = new JLabel();
-		status_panel.add(status);
+		frame.setLocation(600, 300);
 
 		// Main playing area
-		final GameCourt court = new GameCourt(status);
+		final GameCourt court = new GameCourt();
 		frame.add(court, BorderLayout.CENTER);
 		
 		// Put the frame on the screen

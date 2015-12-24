@@ -1,9 +1,4 @@
-package hw09;
-/**
- * CIS 120 Game HW
- * (c) University of Pennsylvania
- * @version 2.0, Mar 2013
- */
+
 
 import java.awt.*;
 import java.awt.event.*;
@@ -39,15 +34,15 @@ public class GameCourt extends JPanel {
 	// the state of the game logic
 	private Neo neo; // character that the player moves
 
-	public State state;
-	private JLabel status; // Current status text
+	public State state; // which screen the user is on
 
 	// Game constants
 	public static final int COURT_WIDTH = 400;
-	public static final int COURT_HEIGHT = 415;
+	public static final int COURT_HEIGHT = 430;
 	// Update interval for timer, in milliseconds
 	public static final int INTERVAL = 35;
 	public static final int GRACE_TIME = 15;
+	// Probabilities of spikes and bombs spawning
 	public static final int INIT_SPIKE_PROB = 1;
 	public static final int INIT_BOMB_PROB = 0;
 	
@@ -72,7 +67,7 @@ public class GameCourt extends JPanel {
 	public static ArrayList<Projectile> projectiles = new ArrayList<Projectile>();
 	public static ArrayList<GameObj> bonuses = new ArrayList<GameObj>();
 
-	public GameCourt(JLabel status) {
+	public GameCourt() {
 		try {
 			if (img == null) {
 				img = ImageIO.read(new File(img_file));
@@ -126,6 +121,7 @@ public class GameCourt extends JPanel {
 			}
 		});
 
+		// Detects user's clicks of various buttons
 		addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
 				if (state == State.MENU) {
@@ -156,8 +152,6 @@ public class GameCourt extends JPanel {
 				}
 			}
 		});
-		
-		this.status = status;
 	}
 
 	/**
@@ -173,7 +167,6 @@ public class GameCourt extends JPanel {
 		score = 0;
 		spikeProb = INIT_SPIKE_PROB;
 		bombProb = INIT_BOMB_PROB;
-		status.setText("Score: " + score);
 
 		// Make sure that this component has the keyboard focus
 		requestFocusInWindow();
@@ -187,9 +180,11 @@ public class GameCourt extends JPanel {
 		if (state == State.PLAYING) {
 			
 			int heartSpawn = rand.nextInt(100);
+			// adds a heart with probability 1/100
 			if (heartSpawn < 1) {
 				addHeart();
 			}
+			// checks if player collects a heart
 			java.util.Iterator<GameObj> bonusIter = bonuses.iterator();
 			while (bonusIter.hasNext()) {
 				GameObj b = bonusIter.next();
@@ -199,11 +194,13 @@ public class GameCourt extends JPanel {
 				}
 			}
 			
+			// releases a new projectile every 10 frames
 			if (counter % 10 == 0) {
 				score++;
 				addProjectile();
 			}
 			
+			// checks if there are collisions with any projectiles
 			java.util.Iterator<Projectile> projIter = projectiles.iterator();
 			while (projIter.hasNext()) {
 				Projectile p = projIter.next();
@@ -221,15 +218,15 @@ public class GameCourt extends JPanel {
 					}
 				}
 
+				// deletes projectiles going off the screen
 				if (p.pos_x < 0 || p.pos_y < 0 || p.pos_x > 400 || p.pos_y > 400) {
 					projIter.remove();
 				}
 			}
 			
-			status.setText("Score: " + score);
-			
 			counter++;
 			
+			// gives the player a fixed time before they can be hit again
 			if (neo.invulnerable) {
 				graceTimer++;
 				if (graceTimer == GRACE_TIME) {
@@ -238,6 +235,7 @@ public class GameCourt extends JPanel {
 				}
 			}
 			
+			// increases the difficulty every 500 frames
 			if (counter % 500 == 0) {
 				spikeProb ++;
 				bombProb ++;
@@ -246,6 +244,7 @@ public class GameCourt extends JPanel {
 			// update the display
 			repaint();
 			
+			// displays game over or allows entry of high scores
 			if (state == State.GAMEOVER) {
 				try {
 					ArrayList<Integer> hsList = getHighScores();
@@ -263,10 +262,17 @@ public class GameCourt extends JPanel {
 		}
 	}
 	
+	/**
+	 * Changes the user's score
+	 * @param x Adds x to score
+	 */
 	public static void changeScore(int x) {
 		score += x;
 	}
 
+	/**
+	 * Spawns a heart randomly
+	 */
 	public static void addHeart() {
 		int heartX = rand.nextInt(6) + 1;
 		int heartY = rand.nextInt(6) + 1;
@@ -282,6 +288,9 @@ public class GameCourt extends JPanel {
 		}
 	}
 	
+	/**
+	 * Spawns a projectile randomly
+	 */
 	public static void addProjectile() {
 		int side = rand.nextInt(4); // 0 = up, 1 = down, 2 = left, 3 = right
 		int position = rand.nextInt(6) + 1;
@@ -326,6 +335,11 @@ public class GameCourt extends JPanel {
 		}
 	}
 	
+	/**
+	 * Returns the 10 highest scores
+	 * @return ArrayList of 10 highest scores
+	 * @throws IOException
+	 */
 	public ArrayList<Integer> getHighScores() throws IOException {
 		ArrayList<Integer> highScores = new ArrayList<Integer>();
 		try {
@@ -346,6 +360,11 @@ public class GameCourt extends JPanel {
 		}
 	}
 	
+	/**
+	 * Allows entry of user's name. Checks for invalid input
+	 * @param additionalMessage
+	 * @return Player's names
+	 */
 	public String getPlayerName(String additionalMessage)
 	{
 		String highScoreMessage = additionalMessage + "You scored " + score +
@@ -368,6 +387,12 @@ public class GameCourt extends JPanel {
 	    return playerName;
 	}
 	
+	/**
+	 * Adds a high score to the high score list
+	 * @param name
+	 * @param score
+	 * @throws IOException
+	 */
 	public void addHighScore(String name, int score) throws IOException {
 		try {
 			Reader r = new FileReader(highscores_file);
@@ -410,19 +435,16 @@ public class GameCourt extends JPanel {
 	
 	public void showMenu() {
 		state = State.MENU;
-		status.setText(" ");
 		repaint();
 	}
 	
 	public void showInstructions() {
 		state = State.INSTRUCTIONSCREEN;
-		status.setText("Learning to play");
 		repaint();
 	}
 	
 	public void showHighScores() {
 		state = State.HIGHSCORESCREEN;
-		status.setText("Admiring the hall of fame");
 		repaint();
 	}
 	
@@ -430,13 +452,16 @@ public class GameCourt extends JPanel {
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		if (state == State.MENU) {
+			g.setColor(Color.BLACK);
+			g.fillRect(0, 0, COURT_WIDTH, COURT_HEIGHT);
 			g.drawImage(menuImg, 0, 0, 400, 400, null);
 		}
 		if (state == State.PLAYING || state == State.GAMEOVER) {
 		g.setColor(Color.WHITE);
-		g.fillRect(0, 0, 400, 400);
+		g.fillRect(0, 0, COURT_WIDTH, COURT_HEIGHT);
 		g.setColor(Color.BLACK);
 		g.drawRect(50, 50, 300, 300);
+		g.drawLine(0, 400, 400, 400);
 		neo.draw(g);
 		for (Projectile p : projectiles) {
 			p.draw(g);
@@ -449,9 +474,20 @@ public class GameCourt extends JPanel {
 		if (heartWidth > 0) {
 			BufferedImage subImg = img.getSubimage(0, 0, heartWidth, 10);
 			int heartXPos = 200 - neo.lives * 5;
-			g.drawImage(subImg, heartXPos, 385, heartWidth, 10, null);
+			g.drawImage(subImg, heartXPos, 405, heartWidth, 10, null);
 		}
 		}
+		Graphics2D g2 = (Graphics2D) g;
+        g2.setColor(Color.BLACK);
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+	            RenderingHints.VALUE_ANTIALIAS_ON);
+        Font font = new Font("Arial", Font.BOLD, 11);
+        g2.setFont(font);
+        FontMetrics fm = g2.getFontMetrics();
+        Rectangle2D rect = fm.getStringBounds("Score: " + score, g2);
+        int x = (this.getWidth() - (int) rect.getWidth()) / 2;
+        g.drawString("Score: " + score, x, 425);
+		
 		if (state == State.GAMEOVER) {
 			drawGameOver(g);
 		}

@@ -1,9 +1,4 @@
-package hw09;
-/**
- * CIS 120 Game HW
- * (c) University of Pennsylvania
- * @version 2.0, Mar 2013
- */
+
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
