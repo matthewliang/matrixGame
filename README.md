@@ -1,5 +1,7 @@
 #The Matrix
 
+Control Neo with the arrow keys to dodge deadly projectiles.
+
 The Matrix is made from the following classes:
 
 Game: Contains the top-level frame that contains the game and allows it to run.
